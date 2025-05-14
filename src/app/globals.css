@@ -1,26 +1,43 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+@theme {
+  --color-dark-100: #17202a;
+  --color-dark-200: #1c2733;
+  --color-dark-300: #283340;
+  --color-dark-400: #3a444c;
+  --color-dark-500: #5b7083;
+  --color-dark-600: #8899a6;
+  --color-dark-700: #EBEEF0;
+  --color-dark-800: #F7F9FA;
+  --color-black: #0F1419;
+  --color-white: #FFFFFF;
+  --color-primary: #1DA1F2;
+  --color-primary-hover: #1991DA;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+@font-face {
+  font-family: "SFCompactDisplay";
+  src: url("/fonts/SFCompactDisplay-Medium.otf") format("opentype");
+  font-weight: medium;
+  font-style: medium;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+@font-face {
+  font-family: "SFCompactDisplay";
+  src: url("/fonts/SFCompactDisplay-Bold.otf") format("opentype");
+  font-weight: bold;
+  font-style: bold;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: "SFCompactDisplay", sans-serif;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
