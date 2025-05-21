@@ -57,7 +57,7 @@ const Sidebar = () => {
               />
               <div>
                 <div className="text-sm font-medium text-black">
-                  {user.firstName} {user.lastName}
+                  {user.lastName} {user.firstName}
                 </div>
                 <div className="text-xs text-gray-500">@{user.username}</div>
               </div>
