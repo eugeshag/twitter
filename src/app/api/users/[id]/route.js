@@ -1,19 +1,24 @@
-import { promises as fs } from "fs";
-import path from "path";
+import connectToDatabase from "@/lib/mongodb";
+import User from "@/models/User";
+import { NextResponse } from "next/server";
 
 export async function GET(request, { params }) {
-  const filePath = path.join(process.cwd(), "src/app/api/data", "users.json");
-  const content = await fs.readFile(filePath, "utf-8");
-  const users = JSON.parse(content);
-  const {id} = await params;
+  try {
+    await connectToDatabase();
 
-  const user = users.find((u) => u.id === Number(id));
+    const { id } = await params;
+    const user = await User.findById(id);
 
-  if (!user) {
-    return new Response(JSON.stringify({ error: "User not found" }), {
-      status: 404,
-    });
+    if (!user) {
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
+    }
+
+    return NextResponse.json(user, { status: 200 });
+  } catch (error) {
+    console.error("[GET_USER_ERROR]", error);
+    return NextResponse.json(
+      { error: "Internal Server Error" },
+      { status: 500 },
+    );
   }
-
-  return new Response(JSON.stringify(user), { status: 200 });
 }

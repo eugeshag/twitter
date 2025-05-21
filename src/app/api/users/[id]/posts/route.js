@@ -1,12 +1,22 @@
-import { promises as fs } from "fs";
-import path from "path";
+import { NextResponse } from "next/server";
+import connectToDatabase from "@/lib/mongodb";
+import Post from "@/models/Post";
 
 export async function GET(request, { params }) {
-  const { id } = await params;
-  const filePath = path.join(process.cwd(), "src/app/api/data", "posts.json");
-  const content = await fs.readFile(filePath, "utf-8");
-  const posts = JSON.parse(content);
-  const userPosts = posts.filter((post) => post.userId === Number(id));
+  await connectToDatabase();
 
-  return new Response(JSON.stringify(userPosts), { status: 200 });
+  const { id } = await params;
+
+  try {
+    const posts = await Post.find({ userId: id })
+      .sort({ createdAt: -1 })
+      .populate("userId", "username avatar firstName lastName");
+
+    return NextResponse.json(posts, { status: 200 });
+  } catch (error) {
+    return NextResponse.json(
+      { message: "Error fetching user posts" },
+      { status: 500 }
+    );
+  }
 }

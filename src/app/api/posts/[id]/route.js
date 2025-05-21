@@ -1,19 +1,27 @@
-import { promises as fs } from "fs";
-import path from "path";
+import { NextResponse } from "next/server";
+import connectToDatabase from "@/lib/mongodb";
+import Post from "@/models/Post";
 
 export async function GET(request, { params }) {
-  const filePath = path.join(process.cwd(), "src/app/api/data", "posts.json");
-  const content = await fs.readFile(filePath, "utf-8");
-  const posts = JSON.parse(content);
-  const {id} = await params;
+  await connectToDatabase();
 
-  const post = posts.find((u) => u.id === Number(id));
+  const { id } = await params;
 
-  if (!post) {
-    return new Response(JSON.stringify({ error: "Post not found" }), {
-      status: 404,
-    });
+  try {
+    const post = await Post.findById(id).populate(
+      "userId",
+      "username avatar firstName lastName",
+    );
+
+    if (!post) {
+      return NextResponse.json({ message: "Post not found" }, { status: 404 });
+    }
+
+    return NextResponse.json(post, { status: 200 });
+  } catch (error) {
+    return NextResponse.json(
+      { message: "Error fetching the post" },
+      { status: 500 },
+    );
   }
-
-  return new Response(JSON.stringify(post), { status: 200 });
 }
