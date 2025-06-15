@@ -1,9 +1,15 @@
 "use client";
 import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { LucideHeart, LucideEye, LucideThumbsDown } from "lucide-react";
+import {
+  LucideHeart,
+  LucideEye,
+  LucideThumbsDown,
+  LucideEllipsis,
+  LucideTrash,
+} from "lucide-react";
 
-const Post = ({ post }) => {
+const Post = ({ post, onDelete }) => {
   const router = useRouter();
   const [likes, setLikes] = useState(post.reactions.likes.length);
   const [dislikes, setDislikes] = useState(post.reactions.dislikes.length);
@@ -11,12 +17,35 @@ const Post = ({ post }) => {
   const [isDisliking, setIsDisliking] = useState(false);
   const [isLiked, setIsLiked] = useState(false);
   const [isDisliked, setIsDisliked] = useState(false);
-  const [views, setViews] = useState(post.views);
+  const [views, setViews] = useState(post.views.length);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [currentUserId, setCurrentUserId] = useState(null);
+
   const hasViewedRef = useRef(false);
   const postRef = useRef(null);
 
-  const { _id, content, userId } = post;
-  const { firstName, lastName, username, avatar } = userId;
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const menuRef = useRef(null);
+
+  const postId = post._id;
+  const content = post.content;
+  const postUser = post.userId;
+  const postUserId = postUser._id;
+  const { firstName, lastName, username, avatar } = postUser;
+
+  useEffect(() => {
+    async function fetchCurrentUser() {
+      try {
+        const res = await fetch("/api/users/me");
+        if (!res.ok) throw new Error("Failed to fetch user");
+        const data = await res.json();
+        setCurrentUserId(data._id);
+      } catch (err) {
+        console.error("Error fetching current user:", err);
+      }
+    }
+    fetchCurrentUser();
+  }, []);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -25,7 +54,7 @@ const Post = ({ post }) => {
           hasViewedRef.current = true;
 
           try {
-            const res = await fetch(`/api/posts/${post._id}/views`, {
+            const res = await fetch(`/api/posts/${postId}/views`, {
               method: "PATCH",
             });
             const data = await res.json();
@@ -47,12 +76,12 @@ const Post = ({ post }) => {
     return () => {
       if (postRef.current) observer.unobserve(postRef.current);
     };
-  }, [_id]);
+  }, [postId]);
 
   useEffect(() => {
     const fetchReaction = async () => {
       try {
-        const res = await fetch(`/api/posts/${_id}/reaction`);
+        const res = await fetch(`/api/posts/${postId}/reaction`);
         const data = await res.json();
 
         setLikes(data.likes);
@@ -65,14 +94,32 @@ const Post = ({ post }) => {
     };
 
     fetchReaction();
-  }, [_id]);
+  }, [postId]);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (menuRef.current && !menuRef.current.contains(event.target)) {
+        setIsMenuOpen(false);
+      }
+    };
+
+    if (isMenuOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    } else {
+      document.removeEventListener("mousedown", handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [isMenuOpen]);
 
   const handleReaction = async (type) => {
     const toggle = type === "like" ? setIsLiking : setIsDisliking;
     toggle(true);
 
     try {
-      const res = await fetch(`/api/posts/${_id}/reaction`, {
+      const res = await fetch(`/api/posts/${postId}/reaction`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ type }),
@@ -96,26 +143,44 @@ const Post = ({ post }) => {
     toggle(false);
   };
 
-  //   if (!user) {
-  //     return (
-  //       <div className="border-dark-700 flex border-b-1 px-4 py-2.5">
-  //         <div className="bg-dark-700 mr-2.5 h-12 w-12 animate-pulse rounded-4xl"></div>
-  //         <div className="w-full">
-  //           <div className="bg-dark-700 flex h-5 w-40 animate-pulse"></div>
-  //           <div className="bg-dark-700 mt-1 h-10 w-full animate-pulse text-sm"></div>
-  //           <div className="bg-dark-700 mt-2.5 flex h-5 animate-pulse"></div>
-  //         </div>
-  //       </div>
-  //     );
-  //   }
+  const handleMore = (e) => {
+    e.stopPropagation();
+
+    console.log(postUserId, currentUserId)
+
+    if (postUserId === currentUserId) {
+      setIsMenuOpen((prev) => !prev);
+    }
+  };
+
+  const handleDelete = async (e) => {
+    e.stopPropagation();
+
+    setIsDeleting(true);
+    try {
+      const res = await fetch(`/api/posts/${postId}`, {
+        method: "DELETE",
+      });
+      if (!res.ok) throw new Error("Error deleting post");
+
+      if (onDelete) {
+        await onDelete();
+      }
+    } catch (err) {
+      console.error("Delete error:", err);
+      alert("Failed to delete post");
+    }
+    setIsDeleting(false);
+    setIsMenuOpen(false);
+  };
 
   return (
     <div
       ref={postRef}
       onClick={() => {
-        router.push(`/post/${_id}`);
+        router.push(`/post/${postId}`);
       }}
-      className="border-dark-700 hover:bg-dark-800 flex cursor-pointer border-b-1 px-4 py-2.5 duration-300"
+      className="border-dark-700 hover:bg-dark-800 relative flex cursor-pointer border-b-1 px-4 py-2.5 duration-300"
     >
       <img
         className="mr-2.5 h-12 w-12 rounded-4xl"
@@ -124,10 +189,10 @@ const Post = ({ post }) => {
         src={avatar}
         alt="Profile Picture"
       />
-      <div>
+      <div className="flex flex-1 flex-col">
         <div className="flex">
           <a
-            href={`/profile/${userId._id}`}
+            href={`/profile/${postUserId}`}
             className="mr-1 text-sm font-bold text-black hover:underline"
             onClick={(e) => {
               e.stopPropagation();
@@ -137,7 +202,7 @@ const Post = ({ post }) => {
           </a>
           <div className="text-dark-500 text-sm">@{username}</div>
         </div>
-        <div className="mt-1 text-sm">{content}</div>
+        <div className="mt-1 max-w-full text-sm break-all">{content}</div>
         <div className="mt-1 flex">
           <div
             className="group text-dark-500 mr-5 flex items-center rounded-full text-xs"
@@ -195,6 +260,32 @@ const Post = ({ post }) => {
           </div>
         </div>
       </div>
+
+      <button
+        onClick={handleMore}
+        className="group text-dark-500 mr-2 flex h-fit cursor-pointer items-center justify-center rounded-full px-1 py-1 duration-300 hover:bg-blue-300"
+      >
+        <LucideEllipsis
+          className={`h-4 w-4 duration-300 group-hover:text-blue-500`}
+        ></LucideEllipsis>
+      </button>
+
+      {isMenuOpen && (
+        <div
+          ref={menuRef}
+          className="border-dark-700 absolute top-2 right-5 z-20 mt-2 rounded-xl border bg-white shadow-xl"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <button
+            onClick={handleDelete}
+            disabled={isDeleting}
+            className="hover:bg-dark-700 flex w-full cursor-pointer items-center rounded-xl px-4 py-2 text-sm text-red-500 duration-300"
+          >
+            <LucideTrash className="mr-2 h-4 w-4" />
+            Delete post
+          </button>
+        </div>
+      )}
     </div>
   );
 };

@@ -1,12 +1,11 @@
 "use client";
 
-import Nav from "@/components/Nav";
 import Post from "@/components/Post";
-import Sidebar from "@/components/Sidebar";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 export default function PostPage() {
+  const router = useRouter()
   const { id } = useParams();
   const [post, setPost] = useState();
 
@@ -24,5 +23,12 @@ export default function PostPage() {
     return <div></div>;
   }
 
-  return <Post post={post} />;
+  return (
+    <Post
+      post={post}
+      onDelete={() => {
+        router.push("/");
+      }}
+    />
+  );
 }

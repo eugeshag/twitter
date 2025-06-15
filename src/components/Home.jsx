@@ -7,14 +7,29 @@ const Home = () => {
   const [posts, setPosts] = useState(null);
   const [user, setUser] = useState(null);
   const [reload, setReload] = useState(false);
+  const [currentUserId, setCurrentUserId] = useState(null);
 
   useEffect(() => {
-    const fetchPosts = async () => {
-      const res = await fetch("/api/posts");
-      const data = await res.json();
-      setPosts(data);
-    };
+    async function fetchCurrentUser() {
+      try {
+        const res = await fetch("/api/users/me");
+        if (!res.ok) throw new Error("Failed to fetch user");
+        const data = await res.json();
+        setCurrentUserId(data._id);
+      } catch (err) {
+        console.error("Error fetching current user:", err);
+      }
+    }
+    fetchCurrentUser();
+  }, []);
 
+  const fetchPosts = async () => {
+    const res = await fetch("/api/posts");
+    const data = await res.json();
+    setPosts(data);
+  };
+
+  useEffect(() => {
     const fetchUser = async () => {
       const res = await fetch(`/api/users/me`);
       const data = await res.json();
@@ -92,7 +107,7 @@ const Home = () => {
       </div>
       <div className="border-dark-700 border-t-1">
         {posts.map((post) => (
-          <Post key={post._id} post={post} />
+          <Post key={post._id} post={post} onDelete={fetchPosts} currentUserId={currentUserId}/>
         ))}
       </div>
     </div>

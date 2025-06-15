@@ -1,7 +1,12 @@
 "use client";
 import { usePathname } from "next/navigation";
 import { useEffect, useState, useRef } from "react";
-import { LucideUser, LucideHome, LucideEllipsis } from "lucide-react";
+import {
+  LucideUser,
+  LucideHome,
+  LucideEllipsis,
+  LucideSearch,
+} from "lucide-react";
 import blankProfilePicture from "../../public/blank-profile-picture.svg";
 
 const Nav = () => {
@@ -12,7 +17,7 @@ const Nav = () => {
 
   const logout = async () => {
     await fetch("/api/logout", { method: "POST" });
-    window.location.href = "/login"; 
+    window.location.href = "/login";
   };
 
   useEffect(() => {
@@ -43,13 +48,13 @@ const Nav = () => {
 
   if (!user) {
     return (
-      <div className="ml-auto flex h-full w-90 flex-col px-5 py-5">
+      <div className="ml-auto flex h-full w-fit flex-col py-5 xl:w-90 xl:px-5">
         <div className="flex flex-col"></div>
         <div className="mt-auto flex items-center rounded-4xl px-3 py-2">
-          <div className="bg-dark-700 mr-2.5 h-10 w-10 animate-pulse rounded-4xl"></div>
+          <div className="bg-dark-700 h-10 w-10 animate-pulse rounded-4xl xl:mr-2.5"></div>
           <div className="mr-auto">
-            <div className="bg-dark-700 h-4 w-25 animate-pulse"></div>
-            <div className="bg-dark-700 mt-2 h-4 w-25 animate-pulse"></div>
+            <div className="bg-dark-700 hidden h-4 w-25 animate-pulse xl:block"></div>
+            <div className="bg-dark-700 mt-2 hidden h-4 w-25 animate-pulse xl:block"></div>
           </div>
         </div>
       </div>
@@ -62,13 +67,14 @@ const Nav = () => {
       label: "Home",
       icon: LucideHome,
     },
+    { href: "/explore", label: "Explore", icon: LucideSearch },
     { href: `/profile/${user._id}`, label: "Profile", icon: LucideUser },
   ];
 
   return (
-    <div className="relative ml-auto flex h-full w-90 flex-col px-5 py-5">
+    <div className="relative ml-auto flex h-full w-fit flex-col py-5 xl:w-90 xl:px-5">
       <div className="flex flex-col">
-        <a className="h-10 px-3" href="/">
+        <a className="flex h-10 justify-center px-3 xl:justify-start" href="/">
           <svg
             width="29"
             height="24"
@@ -91,39 +97,40 @@ const Nav = () => {
             <a
               key={href}
               href={href}
-              className={`hover:bg-dark-800 flex h-15 items-center rounded-4xl px-3 text-xl duration-300 ${baseColor}`}
+              className={`hover:bg-dark-800 flex h-15 items-center justify-center rounded-4xl px-3 text-xl duration-300 xl:justify-start ${baseColor}`}
             >
-              <Icon className={`mr-5 h-7 w-7 ${baseColor}`} />
-              <span>{label}</span>
+              <Icon className={`h-7 w-7 xl:mr-5 ${baseColor}`} />
+              <span className="hidden xl:block">{label}</span>
             </a>
           );
         })}
       </div>
       <button
         onClick={() => setShowMenu((prev) => !prev)}
-        className="hover:bg-dark-800 mt-auto flex cursor-pointer items-center rounded-4xl px-3 py-2 duration-300"
+        className="hover:bg-dark-800 mt-auto flex cursor-pointer items-center justify-center rounded-4xl px-3 py-2 duration-300 xl:justify-start"
       >
         <img
-          className="mr-2.5 rounded-4xl"
+          className="rounded-4xl xl:mr-2.5"
           src={user.avatar}
           alt="Profile Picture"
           width={40}
           height={40}
         />
 
-        <div className="items-left mr-auto flex flex-col">
+        <div className="items-left mr-auto hidden flex-col xl:flex">
           <div className="text-base font-bold text-black">
-            {user.lastName} {user.firstName}
+            {user.firstName} {user.lastName}
           </div>
           <div className="text-dark-500 w-fit">@{user.username}</div>
         </div>
-        <LucideEllipsis className="text-black" />
+
+        <LucideEllipsis className="hidden text-black xl:block" />
       </button>
 
       {showMenu && (
         <div
           ref={menuRef}
-          className="absolute bottom-23 left-5 w-[calc(100%-40px)] rounded-xl bg-white p-3 shadow-md"
+          className="absolute bottom-23 left-5 z-[1000] w-60 rounded-xl bg-white p-3 shadow-md xl:w-[calc(100%-40px)]"
         >
           <button
             onClick={logout}

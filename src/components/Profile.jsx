@@ -8,13 +8,13 @@ const Profile = ({ userId }) => {
   const [userPosts, setUserPosts] = useState(null);
   const [user, setUser] = useState(null);
 
-  useEffect(() => {
-    const fetchUserPosts = async () => {
-      const res = await fetch(`/api/users/${userId}/posts`);
-      const data = await res.json();
-      setUserPosts(data);
-    };
+  const fetchUserPosts = async () => {
+    const res = await fetch(`/api/users/${userId}/posts`);
+    const data = await res.json();
+    setUserPosts(data);
+  };
 
+  useEffect(() => {
     const fetchUser = async () => {
       const res = await fetch(`/api/users/${userId}`);
       const data = await res.json();
@@ -85,7 +85,7 @@ const Profile = ({ userId }) => {
       </div>
       <div>
         {userPosts.map((post) => (
-          <Post key={post._id} post={post} />
+          <Post key={post._id} post={post} onDelete={fetchUserPosts}/>
         ))}
       </div>
     </div>
