@@ -66,7 +66,7 @@ const Home = () => {
   if (!posts || !user) {
     return (
       <div className="flex h-screen flex-col">
-        <div className="border-dark-700 h-45 border-t-1 px-4 py-3">
+        <div className="border-dark-700 h-43 border-t-1 px-4 py-3">
           <div className="bg-dark-700 h-full animate-pulse rounded-4xl"></div>
         </div>
         <div className="border-dark-700 flex-1 border-t-1 px-4 py-3">
