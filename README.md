@@ -1,6 +1,6 @@
 # 🐦 Twitter Clone
 
-A full-stack Twitter-like social media app built with **Next.js 14 (App Router)**, **Tailwind CSS**, **MongoDB**, and **custom JWT-based authentication** (without NextAuth).
+A full-stack Twitter-like social media app built with **Next.js 14 (App Router)**, **Tailwind CSS**, **MongoDB**, and **custom JWT-based authentication**.
 
 ---
 
@@ -75,4 +75,9 @@ Open http://localhost:3000
 5. Infinite scroll
 
 6. Better error handling
+
+---
+
+## 📄 License
+MIT License
 
