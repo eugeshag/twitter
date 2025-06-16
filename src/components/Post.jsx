@@ -189,7 +189,7 @@ const Post = ({ post, onDelete }) => {
         src={avatar}
         alt="Profile Picture"
       />
-      <div className="flex flex-1 flex-col">
+      <div className="flex flex-1 flex-col max-w-[calc(100%-82px)]">
         <div className="flex">
           <a
             href={`/profile/${postUserId}`}
@@ -202,7 +202,7 @@ const Post = ({ post, onDelete }) => {
           </a>
           <div className="text-dark-500 text-sm">@{username}</div>
         </div>
-        <div className="mt-1 max-w-full text-sm break-all">{content}</div>
+        <div className="mt-1 text-sm break-words">{content}</div>
         <div className="mt-1 flex">
           <div
             className="group text-dark-500 mr-5 flex items-center rounded-full text-xs"
